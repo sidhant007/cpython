@@ -83,12 +83,19 @@ The :mod:`csv` module defines the following functions:
       Spam, Lovely Spam, Wonderful Spam
 
 
-.. function:: writer(csvfile, dialect='excel', **fmtparams)
+.. function:: writer(csvfile, encoding=None, dialect='excel', **fmtparams)
 
    Return a writer object responsible for converting the user's data into delimited
    strings on the given file-like object.  *csvfile* can be any object with a
    :func:`write` method.  If *csvfile* is a file object, it should be opened with
-   ``newline=''`` [1]_.  An optional *dialect*
+   ``newline=''`` [1]_.  An optional *encoding* parameter can be given which is
+   used to define how to decode the bytes encountered before writing them to 
+   the csv. After being decoded using this encoding scheme, this resulting string
+   will then be transcoded from this encoding scheme to the encoding scheme specified
+   by the file object and be written into the CSV file. If the decoding or the 
+   transcoding fails an error will be thrown. Incase this optional parameter is not
+   provided or is set to None then all the bytes will be stringified with :func:`str`
+   before being written just like all the other non-string data. Another optional *dialect*
    parameter can be given which is used to define a set of parameters specific to a
    particular CSV dialect.  It may be an instance of a subclass of the
    :class:`Dialect` class or one of the strings returned by the
@@ -106,8 +113,9 @@ The :mod:`csv` module defines the following functions:
 
       import csv
       with open('eggs.csv', 'w', newline='') as csvfile:
-          spamwriter = csv.writer(csvfile, delimiter=' ',
+          spamwriter = csv.writer(csvfile, encoding='latin1', delimiter=' ',
                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
+          spamwriter.writerow([b'\xc2', 'A', 'B'])
           spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
           spamwriter.writerow(['Spam', 'Lovely Spam', 'Wonderful Spam'])
 
